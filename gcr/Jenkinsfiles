@@ -6,13 +6,13 @@ pipeline {
     }
 
     environment {
-    SVC_ACCOUNT_KEY = credentials('dev-auth')
+    SVC_ACCOUNT_KEY = credentials('jenk-auth')
   }
      
     stages {
         stage ('git checkout'){
             steps {
-                git branch: 'master', url: 'https://github.com/ishaqmdgcp/jar.git'
+                git branch: 'master', url: 'https://github.com/kalkirs/jar.git'
             }
         }
       
@@ -26,7 +26,7 @@ pipeline {
 		stage('Set creds') {
             steps {
               
-                sh 'echo $SVC_ACCOUNT_KEY | base64 -d > ./gcr/jenkins.json'
+                sh 'echo $SVC_ACCOUNT_KEY | base64 -d > ./home/jenkins.json'
 		            sh 'pwd'
                        
                
@@ -37,7 +37,7 @@ pipeline {
 	 steps {
         /* Below command specifies exactly like the command line */
     
-        sh 'docker build -t gcr.io/mi-dev-env/javaapp2 .'
+        sh 'docker build -t gcr.io/mimurthylab/javaapp2 .'
     }
     }
         
@@ -46,25 +46,18 @@ pipeline {
 			  dir('gcr')
 			 {
 			 sh 'pwd'
-        sh 'gcloud auth activate-service-account jenkins@mi-dev-env.iam.gserviceaccount.com --key-file=jenkins.json'
+        sh 'gcloud auth activate-service-account jenkins@mimurthylab.iam.gserviceaccount.com --key-file=jenkins.json'
 	    sh 'gcloud auth configure-docker'
-        sh 'docker push gcr.io/mi-dev-env/javaapp2'
+        sh 'docker push gcr.io/mimurthylab/javaapp2'
 			 }
 		 }
 	 }
 	 
-	 
-	stage('Create GKE cluster') {
-	 steps {
-    
-        sh 'gcloud container clusters create samples-cluster --zone us-central1-a --num-nodes=1 --project mi-dev-env'
-    }
-    }
     
     stage('Get creds from GKE cluster') {
 	 steps {
     
-        sh 'gcloud container clusters get-credentials samples-cluster --zone us-central1-a --project mi-dev-env'
+        sh 'gcloud container clusters get-credentials my-kube-cluster --region us-central1 --project mimurthylab'
     }
     }
     
@@ -84,7 +77,7 @@ pipeline {
     stage('App health check') {
 	 steps {
     
-        sh 'curl http://34.171.69.164:8080/health'
+        sh 'curl http://34.31.33.1:8080/health'
 	
     
     }
